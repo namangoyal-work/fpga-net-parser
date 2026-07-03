@@ -29,9 +29,11 @@ module ipv4_parser (
   logic        proto_ok;
   logic [31:0] csum;
 
-  wire [16:0] fold1   = csum[15:0] + csum[31:16];
-  wire [15:0] folded  = fold1[15:0] + {15'b0, fold1[16]};
-  wire        csum_ok = (folded == 16'hFFFF);
+  // Checksum fold, pipelined across three cycles so each stage is a short path
+  // and the carry chain never feeds combinationally into the L1 trigger.
+  logic [16:0] fold1_r;    // stage 1: csum[15:0] + csum[31:16], registered at byte 34
+  logic [15:0] fold2_r;    // stage 2: add the end-around carry back in, registered at byte 35
+  logic        csum_ok_r;  // stage 3: final ones'-complement compare, registered at byte 36
 
   always_ff @(posedge clk) begin
     if (!rst_n) begin
@@ -41,9 +43,12 @@ module ipv4_parser (
       nofrag_ok  <= 1'b0;
       proto_ok   <= 1'b0;
       csum       <= '0;
+      fold1_r    <= '0;
+      fold2_r    <= '0;
+      csum_ok_r  <= 1'b0;
     end else if (beat) begin
       if (s_tlast) count <= '0;
-      else if (count < 6'd34) count <= count + 1'b1;
+      else if (count < 6'd40) count <= count + 1'b1;
 
       if (count == 6'd0) begin
         ip_done    <= 1'b0;
@@ -69,9 +74,15 @@ module ipv4_parser (
       end
 
       if (count == 6'd33) ip_done <= 1'b1;
+
+      // csum holds the full sum from byte 34 onward; fold it in three registered
+      // steps (fold, add end-around carry, compare) so each stage is a short path.
+      if (count == 6'd34) fold1_r   <= csum[15:0] + csum[31:16];
+      if (count == 6'd35) fold2_r   <= fold1_r[15:0] + {15'b0, fold1_r[16]};
+      if (count == 6'd36) csum_ok_r <= (fold2_r == 16'hFFFF);
     end
   end
 
-  assign ip_ok = ip_done && ver_ihl_ok && nofrag_ok && proto_ok && csum_ok;
+  assign ip_ok = ip_done && ver_ihl_ok && nofrag_ok && proto_ok && csum_ok_r;
 
 endmodule
