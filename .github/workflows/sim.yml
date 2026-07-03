@@ -20,3 +20,8 @@ jobs:
         run: make -C tb DUT=ipv4_parser
       - name: udp bench
         run: make -C tb DUT=udp_parser
+      - name: l1 bench
+        run: make -C tb DUT=l1_trigger
+      - name: top bench
+        run: make -C tb DUT=parser_top
+        
