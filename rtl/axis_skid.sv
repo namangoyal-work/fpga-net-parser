@@ -32,13 +32,13 @@ module axis_skid (
         if (state == FULL) begin
             m_tdata <= skid_data;
             m_tlast <= skid_last;
-            m_tvalid <= 1'b01;
+            m_tvalid <= 1'b1;
             state <= EMPTY;
 
         end else begin
           m_tdata <= s_tdata;
           m_tlast <= s_tlast;
-          m_tvalid <= s_tvalid;
+          m_tvalid <=1'b1;
           
         end
       end else begin
