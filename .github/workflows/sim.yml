@@ -1,5 +1,7 @@
 name: sim
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -24,4 +26,7 @@ jobs:
         run: make -C tb DUT=l1_trigger
       - name: top bench
         run: make -C tb DUT=parser_top
-        
+      - name: fuzz
+        run: make -C tb DUT=parser_top COCOTB_TEST_MODULES=test_fuzz
+      - name: fpga_top sim
+        run: make -C tb DUT=fpga_top COCOTB_TEST_MODULES=test_fpga_top 
