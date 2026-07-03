@@ -59,7 +59,7 @@ async def rejects_corrupted_checksum(dut):
     bad = bytearray(good_frame())
     bad[18] ^= 0x01                     # flip one bit in the identification field
     await send_frame(dut, bytes(bad))
-    assert int (dut.ip_done.value) == 0,
+    assert int (dut.ip_done.value) == 1
     assert int(dut.ip_ok.value) == 0, "single flipped bit must be caught by checksum"
 
 
@@ -69,7 +69,7 @@ async def rejects_wrong_version_ihl(dut):
     bad = bytearray(good_frame())
     bad[14] = 0x46                      # IHL = 6: header with options
     await send_frame(dut, bytes(bad))
-    assert int(dut.ip_done.value) == 0,
+    assert int(dut.ip_done.value) == 1
     assert int(dut.ip_ok.value) == 0, "IHL != 5 must be rejected"
 
 
@@ -80,7 +80,7 @@ async def rejects_fragments(dut):
                  / IP(src="10.0.0.1", dst="10.0.0.2", flags="MF")
                  / UDP() / Raw(b"hello"))
     await send_frame(dut, wire)
-    assert int (dut.ip_done.value) == 0,
+    assert int (dut.ip_done.value) == 1
     assert int(dut.ip_ok.value) == 0, "fragmented packet must be rejected"
 
 
@@ -91,7 +91,7 @@ async def rejects_non_udp(dut):
                  / IP(src="10.0.0.1", dst="10.0.0.2", proto=6)
                  / Raw(bytes(20)))
     await send_frame(dut, wire)
-    assert int (dut.ip_done.value) == 0, 
+    assert int (dut.ip_done.value) == 1 
     assert int(dut.ip_ok.value) == 0, "TCP must be rejected"
 
 
@@ -102,5 +102,5 @@ async def truncated_then_recovers(dut):
     await send_frame(dut, wire[:20])    # dies mid-IP-header
     assert int(dut.ip_done.value) == 0, "truncated header must not complete"
     await send_frame(dut, wire)
-    asseret int(dut.ip_done.value) == 1,
+    assert int(dut.ip_done.value) == 1
     assert int(dut.ip_ok.value) == 1,   "parser must recover after truncation"
