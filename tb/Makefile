@@ -5,4 +5,5 @@ COMPILE_ARGS += -g2012
 VERILOG_SOURCES = $(PWD)/../rtl/$(DUT).sv
 TOPLEVEL = $(DUT)
 COCOTB_TEST_MODULES ?= test_$(DUT)
+SIM_BUILD = sim_build_$(DUT)
 include $(shell cocotb-config --makefiles)/Makefile.sim
