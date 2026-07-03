@@ -13,4 +13,10 @@ jobs:
       - name: belt bench
         run: make -C tb DUT=axis_passthrough
       - name: skid bench
-        run: make -C tb
+        run: make -C tb DUT=axis_skid
+      - name: eth bench
+        run: make -C tb DUT=eth_parser
+      - name: ipv4 bench
+        run: make -C tb DUT=ipv4_parser
+      - name: udp bench
+        run: make -C tb DUT=udp_parser
