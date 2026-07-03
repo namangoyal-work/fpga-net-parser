@@ -38,7 +38,7 @@ module axis_skid (
         end else begin
           m_tdata <= s_tdata;
           m_tlast <= s_tlast;
-          m_tvalid <=1'b1;
+          m_tvalid <= s_beat;
           
         end
       end else begin
