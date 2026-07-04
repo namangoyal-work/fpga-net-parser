@@ -3,10 +3,10 @@
 # SW Build 5239630 on Fri Nov 08 22:34:34 MST 2024
 # IP Build 5239520 on Sun Nov 10 16:12:51 MST 2024
 # SharedData Build 5239561 on Fri Nov 08 14:39:27 MST 2024
-# Start of session at: Fri Jul  3 16:30:21 2026
-# Process ID         : 49714
+# Start of session at: Sat Jul  4 15:13:57 2026
+# Process ID         : 61911
 # Current directory  : /home/user/InternEric/projects/fpga-net-parser
-# Command line       : vivado -mode batch -source synth/program.tcl
+# Command line       : vivado -mode batch -source synth/char.tcl
 # Log file           : /home/user/InternEric/projects/fpga-net-parser/vivado.log
 # Journal file       : /home/user/InternEric/projects/fpga-net-parser/vivado.jou
 # Running On         : xilinxtemplatetsg
@@ -19,6 +19,6 @@
 # Host memory        : 16565 MB
 # Swap memory        : 4294 MB
 # Total Virtual      : 20860 MB
-# Available Virtual  : 19615 MB
+# Available Virtual  : 20062 MB
 #-----------------------------------------------------------
-source synth/program.tcl
+source synth/char.tcl
