@@ -25,8 +25,12 @@ module axis_skid (
 
   always_ff @(posedge clk) begin
     if (!rst_n) begin
-      m_tvalid <= 1'b0;
-      state    <= EMPTY;
+      m_tvalid  <= 1'b0;
+      m_tdata   <= '0;
+      m_tlast   <= 1'b0;
+      skid_data <= '0;
+      skid_last <= 1'b0;
+      state     <= EMPTY;
     end else begin
       if (out_ready) begin
         if (state == FULL) begin
@@ -51,5 +55,40 @@ module axis_skid (
       end
     end
   end
+
+`ifdef FORMAL
+  // Formal proof of the AXI-Stream contract. Enabled only under SymbiYosys.
+  reg f_past_valid = 1'b0;
+  always @(posedge clk) f_past_valid <= 1'b1;
+
+  always @(posedge clk) begin
+    if (f_past_valid && $past(rst_n) && rst_n) begin
+      // Assume the upstream producer is AXI-Stream compliant: a valid offer is
+      // held stable until it is accepted.
+      if ($past(s_tvalid && !s_tready)) begin
+        assume (s_tvalid);
+        assume (s_tdata == $past(s_tdata));
+        assume (s_tlast == $past(s_tlast));
+      end
+
+      // Prove our downstream interface honours the same contract: once a valid
+      // beat is offered we never retract it or mutate the payload before accept.
+      if ($past(m_tvalid && !m_tready)) begin
+        assert (m_tvalid);
+        assert (m_tdata == $past(m_tdata));
+        assert (m_tlast == $past(m_tlast));
+      end
+
+      // Liveness: FULL plus a ready consumer drains to EMPTY on the next cycle.
+      if ($past(state == FULL) && $past(m_tready))
+        assert (state == EMPTY);
+    end
+
+    // Single-slot backpressure invariant: never accept input while occupied.
+    // This is precisely why one skid slot suffices for one-cycle-late ready.
+    if (rst_n && state == FULL)
+      assert (!s_tready);
+  end
+`endif
 
 endmodule

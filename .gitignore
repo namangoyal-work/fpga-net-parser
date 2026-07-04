@@ -5,3 +5,18 @@ results.xml
 *.vcd
 *.fst
 sim.vvp
+
+# Vivado litter
+vivado*.log
+vivado*.jou
+.Xil/
+clockInfo.txt
+usage_statistics_*
+
+# formal work dirs (SymbiYosys creates one per .sby, named after it)
+formal/axis_skid/
+formal/l1_trigger/
+
+
+# demo bitstream is committed intentionally (docs/fpga_top.bit)
+.DS_Store

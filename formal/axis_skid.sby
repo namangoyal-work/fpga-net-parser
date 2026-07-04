@@ -1,0 +1,13 @@
+[options]
+mode prove
+depth 20
+
+[engines]
+smtbmc
+
+[script]
+read_verilog -sv -formal -DFORMAL axis_skid.sv
+prep -top axis_skid
+
+[files]
+rtl/axis_skid.sv
