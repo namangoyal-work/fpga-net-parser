@@ -47,7 +47,7 @@ module fpga_top (
   logic [7:0] cur;
   always_comb begin
     cur = rom[idx[5:0]];
-    if (sw[0] && idx == 8'd36) cur = rom[36] ^ 8'hFF;   // corrupt UDP dport
+    if (sw[0] && idx == 8'd36) cur = cur ^ 8'hFF;   // corrupt UDP dport (byte 36)
   end
 
   logic [7:0] s_tdata;

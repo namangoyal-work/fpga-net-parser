@@ -31,6 +31,9 @@ module udp_parser #(
     if (!rst_n) begin
       count    <= '0;
       udp_done <= 1'b0;
+      src_port <= '0;
+      dst_port <= '0;
+      udp_len  <= '0;
     end else if (beat) begin
       if (s_tlast) count <= '0;
       else if (count < 6'd40) count <= count + 6'd1;

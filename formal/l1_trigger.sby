@@ -1,0 +1,13 @@
+[options]
+mode prove
+depth 24
+
+[engines]
+smtbmc
+
+[script]
+read_verilog -sv -formal -DFORMAL l1_trigger.sv
+prep -top l1_trigger
+
+[files]
+rtl/l1_trigger.sv

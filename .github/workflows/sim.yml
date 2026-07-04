@@ -1,5 +1,10 @@
 name: sim
+
 on: [push, pull_request]
+
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -24,4 +29,26 @@ jobs:
         run: make -C tb DUT=l1_trigger
       - name: top bench
         run: make -C tb DUT=parser_top
-        
+      - name: fpga wrapper bench
+        run: make -C tb DUT=fpga_top
+      - name: adversarial fuzz
+        run: make -C tb DUT=parser_top COCOTB_TEST_MODULES=test_fuzz
+
+  formal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: install OSS CAD Suite
+        run: |
+          URL=$(curl -s https://api.github.com/repos/YosysHQ/oss-cad-suite-build/releases/latest \
+                | grep -o 'https://[^"]*oss-cad-suite-linux-x64-[^"]*\.tgz' | head -1)
+          wget -q -O oss-cad-suite.tgz "$URL"
+          tar xzf oss-cad-suite.tgz
+      - name: prove skid buffer handshake contract
+        run: |
+          source oss-cad-suite/environment
+          sby -f formal/axis_skid.sby
+      - name: prove L1 trigger fixed latency
+        run: |
+          source oss-cad-suite/environment
+          sby -f formal/l1_trigger.sby

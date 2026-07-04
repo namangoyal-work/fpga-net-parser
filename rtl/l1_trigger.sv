@@ -58,6 +58,7 @@ module l1_trigger #(
   always_ff @(posedge clk) begin
     if (!rst_n) begin
       v_pipe <= '0;
+      d_pipe <= '0;
     end else begin
       v_pipe[0] <= ev_q || runt_q;
       d_pipe[0] <= decision;
@@ -70,5 +71,35 @@ module l1_trigger #(
 
   assign verdict_valid = v_pipe[P-1];
   assign verdict       = d_pipe[P-1];
+
+`ifdef FORMAL
+  // Prove the defining property of an L1 trigger: the verdict pulse lands a
+  // constant LATENCY cycles after its anchor event, for every input, always.
+  // This is the "fixed latency" guarantee made machine-checked.
+  reg [7:0] f_init = 8'd0;
+  always @(posedge clk) if (f_init != 8'hFF) f_init <= f_init + 8'd1;
+
+  // Start in reset, then hold it deasserted: examine steady-state operation.
+  initial assume (!rst_n);
+  always @(posedge clk) if (f_init != 8'd0) assume (rst_n);
+
+  always @(posedge clk) begin
+    if (f_init > LATENCY && rst_n) begin
+      // verdict_valid now  <=>  an anchor event exactly LATENCY cycles ago.
+      assert (verdict_valid == $past(hdr_event || runt_event, LATENCY));
+
+      // Security invariant (no bad accept): an ACCEPT verdict can only be
+      // emitted if, at the anchor cycle, every validation flag was asserted and
+      // the frame was not a runt. The pipeline can never manufacture an accept.
+      if (verdict_valid && verdict) begin
+        assert (!$past(runt_q,  P));
+        assert ( $past(mac_ok,  P));
+        assert ( $past(type_ok, P));
+        assert ( $past(ip_ok,   P));
+        assert ( $past(udp_ok,  P));
+      end
+    end
+  end
+`endif
 
 endmodule

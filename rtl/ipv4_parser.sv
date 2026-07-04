@@ -43,6 +43,9 @@ module ipv4_parser (
       nofrag_ok  <= 1'b0;
       proto_ok   <= 1'b0;
       csum       <= '0;
+      src_ip     <= '0;
+      dst_ip     <= '0;
+      total_len  <= '0;
       fold1_r    <= '0;
       fold2_r    <= '0;
       csum_ok_r  <= 1'b0;
